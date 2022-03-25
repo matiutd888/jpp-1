@@ -1,7 +1,5 @@
 module PPrint where
 
-import Data.Foldable (Foldable (foldl'))
-
 writeln :: String -> IO ()
 writeln = putStrLn
 
@@ -13,7 +11,7 @@ pprV = intercalateS $ showString "\n"
 pprH = intercalateS $ showString " "
 
 intercalateS :: ShowS -> [ShowS] -> ShowS
-intercalateS sep [] = showString "\n"
+intercalateS sep [] = id
 intercalateS sep (x : xs) = x . foldr (.) id (map (sep .) xs)
 
 pprListWith :: (a -> ShowS) -> [a] -> ShowS
