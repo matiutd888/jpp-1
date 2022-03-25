@@ -77,12 +77,12 @@ showMerklePath :: MerklePath -> String
 showMerklePath p = showsMerklePath p ""
 
 instance Show a => Show (MerkleProof a) where
-  showsPrec d (MerkleProof x p) =
+  showsPrec d (MerkleProof element path) =
     showParen (d > 10) $
       showString "MerkleProof "
-        . showsPrec 11 x
+        . showsPrec 11 element
         . showString " "
-        . showsMerklePath p
+        . showsMerklePath path
 
 verifyProof :: Hashable a => Hash -> MerkleProof a -> Bool
 verifyProof hToCheck (MerkleProof a proof) = foldr g (hash a) proof == hToCheck
