@@ -2,7 +2,6 @@ module Blockchain where
 
 import Control.Monad
 import Data.Bool (Bool)
-import Data.ByteString (any)
 import Data.List
 import Data.Maybe
 import Data.Word
