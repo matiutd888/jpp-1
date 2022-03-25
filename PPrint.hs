@@ -12,11 +12,10 @@ pprV = intercalateS $ showString "\n"
 pprH = intercalateS $ showString " "
 
 intercalateS :: ShowS -> [ShowS] -> ShowS
--- intercalateS sep [] = id
-intercalateS sep = foldr (\s acc -> s . sep . acc) id
-
+intercalateS sep [] = showString "\n"
+intercalateS sep (x:xs) = x . (foldr (.) id $ map (sep .) xs)
 pprListWith :: (a -> ShowS) -> [a] -> ShowS
-pprListWith =  (foldl' (.) id .) . map
+pprListWith x y = intercalateS (showString "\n") $ map x y 
 
 runShows :: ShowS -> IO ()
 runShows = putStrLn . ($"")
