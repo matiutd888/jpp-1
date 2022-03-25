@@ -27,15 +27,18 @@ buildTree = buildTreeFromTree . map leaf
         compress :: Hashable a => [Tree a] -> [Tree a] -> [Tree a]
         compress r [] = r
         compress r [x] = twig x : r
-        compress r (x : z : xs) = compress (node x z : r) $ xs
+        compress r (x : z : xs) = compress (node x z : r) xs
 
 -- TODO przepisać na ShowString
+-- drawTreeS :: Show a => Tree a -> String
+-- drawTree 
+
 drawTree :: Show a => Tree a -> String
-drawTree = drawTreeHelp "  " where
+drawTree = drawTreeHelp "" where
     drawTreeHelp :: Show a => String -> Tree a -> String
-    drawTreeHelp indent (Leaf h a) = indent ++ " " ++ showHash h ++ " " ++ show a ++ "\n"
-    drawTreeHelp indent (Twig h x) = indent ++ " " ++ showHash h  ++ " - \n" ++ drawTreeHelp ("  " ++ indent) x
-    drawTreeHelp indent (Node h l r) = indent ++ " " ++ showHash h ++ " + \n" ++ drawTreeHelp ("  " ++ indent) l ++ drawTreeHelp ("  " ++indent) r
+    drawTreeHelp indent (Leaf h a) = indent ++ showHash h ++ " " ++ show a ++ "\n"
+    drawTreeHelp indent (Twig h x) = indent ++ showHash h  ++ " + \n" ++ drawTreeHelp ("  " ++ indent) x
+    drawTreeHelp indent (Node h l r) = indent ++  showHash h ++ " - \n" ++ drawTreeHelp ("  " ++ indent) l ++ drawTreeHelp ("  " ++indent) r
 type MerklePath = [Either Hash Hash]
 
 data MerkleProof a = MerkleProof a MerklePath
@@ -78,7 +81,7 @@ instance Show a => Show (MerkleProof a) where
         showsMerklePath p
 
 verifyProof :: Hashable a => Hash -> MerkleProof a -> Bool
-verifyProof hToCheck (MerkleProof a proof) = foldr g (hash a) proof == hToCheck where 
+verifyProof hToCheck (MerkleProof a proof) = foldr g (hash a) proof == hToCheck where
     g (Left h) hacc = hash (hacc, h)
     g (Right h) hacc = hash (h, hacc)
 

@@ -1,11 +1,17 @@
 module Blockchain where
 import Control.Monad
 import Data.Word
-
+import Data.Maybe
 import Hashable32
 import HashTree
-import PPrint
+import Data.List
+
 import Utils
+import Data.ByteString (any)
+import Data.Bool (Bool)
+import GHC.Enum (Bounded(maxBound))
+import PPrint
+
 
 type Address = Hash
 type Amount = Word32
@@ -43,8 +49,12 @@ difficulty = 5
 blockReward = 50*coin
 coinbaseTx miner = Tx {txFrom = 0, txTo = miner, txAmount = blockReward}
 
+-- TODO można zakładać że implementacja hash dla Blocku jest taka jak tutaj, czyli czy validnonce 
 validNonce :: BlockHeader -> Bool
 validNonce b = (hash b) `mod` (2^difficulty) == 0
+
+-- validBlock :: Block -> Bool
+-- validBlock b = (hash b) `mod` (2^difficulty) == 0
 
 tx1 = Tx
   { txFrom = hash "Alice"
@@ -55,10 +65,20 @@ tx1 = Tx
 type Miner = Address
 type Nonce = Word32
 
+
 mineBlock :: Miner -> Hash -> [Transaction] -> Block
-mineBlock miner parent txs = undefined
+
+
+-- TODO czy validNonce może sprawdzać czy...jest dobre nonce.
+mineBlock miner parent txs = Block (fromJust $ find validNonce (map (BlockHeader parent coinbase txroot) [0..maxBound::Nonce])) txs
+  where
+    coinbase = coinbaseTx miner
+    txroot = treeHash $ buildTree (coinbase:txs)
+
+
 
 genesis = block0
+-- TODO czy block zerowy ma zawsze parentHash równy zero.
 block0 = mineBlock (hash "Satoshi") 0 []
 block1 = mineBlock (hash "Alice") (hash genesis) []
 block2 = mineBlock (hash "Charlie") (hash block1) [tx1]
@@ -72,10 +92,10 @@ chain = [block2, block1, block0]
 -- Just 0x0dbea380
 
 validChain :: [Block] -> Bool
-validChain = undefined
+validChain = Data.Maybe.isJust . verifyChain
 
 verifyChain :: [Block] -> Maybe Hash
-verifyChain = undefined
+verifyChain blocks = foldM (flip verifyBlock) 0 $ reverse blocks
 
 verifyBlock :: Block -> Hash -> Maybe Hash
 verifyBlock b@(Block hdr txs) parentHash = do
@@ -123,7 +143,14 @@ validateReceipt r hdr = txrBlock r == hash hdr
                         && verifyProof (txroot hdr) (txrProof r)
 
 mineTransactions :: Miner -> Hash -> [Transaction] -> (Block, [TransactionReceipt])
-mineTransactions miner parent txs = undefined
+mineTransactions miner parent txs = (b, map (\x -> TxReceipt hb (fromJust $ buildProof x tree)) txs)
+  where
+    b = mineBlock miner parent txs
+    tree = buildTree (coinbase (blockHdr b):txs)
+    hb = hash b
+
+
+
 
 {- | Pretty printing
 >>> runShows $ pprBlock block2
