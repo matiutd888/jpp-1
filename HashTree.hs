@@ -29,16 +29,18 @@ buildTree = buildTreeFromTree . map leaf
         compress r [x] = twig x : r
         compress r (x : z : xs) = compress (node x z : r) xs
 
--- TODO przepisać na ShowString
--- drawTreeS :: Show a => Tree a -> String
--- drawTree 
 
 drawTree :: Show a => Tree a -> String
-drawTree = drawTreeHelp "" where
-    drawTreeHelp :: Show a => String -> Tree a -> String
-    drawTreeHelp indent (Leaf h a) = indent ++ showHash h ++ " " ++ show a ++ "\n"
-    drawTreeHelp indent (Twig h x) = indent ++ showHash h  ++ " + \n" ++ drawTreeHelp ("  " ++ indent) x
-    drawTreeHelp indent (Node h l r) = indent ++  showHash h ++ " - \n" ++ drawTreeHelp ("  " ++ indent) l ++ drawTreeHelp ("  " ++indent) r
+drawTree s = drawTreeS "" s "" where
+    drawTreeS :: Show a => String -> Tree a -> ShowS
+    drawTreeS indent (Leaf h a) = showString $ indent ++ showHash h ++ " " ++ show a ++ "\n"
+    drawTreeS indent (Twig h x) = showString (indent ++ showHash h  ++ " + \n") 
+                                    . drawTreeS ("  " ++ indent) x
+    drawTreeS indent (Node h l r) = showString (indent ++ showHash h ++ " - \n") 
+                                    . drawTreeS ("  " ++ indent) l 
+                                    . drawTreeS ("  " ++indent) r
+
+
 type MerklePath = [Either Hash Hash]
 
 data MerkleProof a = MerkleProof a MerklePath
@@ -84,8 +86,3 @@ verifyProof :: Hashable a => Hash -> MerkleProof a -> Bool
 verifyProof hToCheck (MerkleProof a proof) = foldr g (hash a) proof == hToCheck where
     g (Left h) hacc = hash (hacc, h)
     g (Right h) hacc = hash (h, hacc)
-
-
--- instance Foldable Tree where
---     foldMap f $ Leaf h a = f a
---     foldMap f $ Twig h s = `mappend`
