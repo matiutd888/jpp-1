@@ -66,12 +66,12 @@ merklePaths a (Leaf h val)
 merklePaths a (Twig h s) = map ((Left $ treeHash s) :) $ merklePaths a s
 merklePaths a (Node h l r) = map ((Left $ treeHash r) :) (merklePaths a l) ++ map ((Right $ treeHash l) :) (merklePaths a r)
 
-showEither :: Either Hash Hash -> String
-showEither (Left h) = "<" ++ showHash h
-showEither (Right h) = ">" ++ showHash h
+showsEither :: Either Hash Hash -> ShowS 
+showsEither (Left h) = showString "<" . showString (showHash h)
+showsEither (Right h) = showString ">" . showString (showHash h)
 
 showsMerklePath :: MerklePath -> ShowS
-showsMerklePath = showString . concatMap showEither
+showsMerklePath = foldl (.) id . map showsEither 
 
 showMerklePath :: MerklePath -> String
 showMerklePath p = showsMerklePath p ""
