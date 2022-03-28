@@ -1,8 +1,6 @@
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 module HashTree where
-
-import Data.Tree (drawTree)
 import Hashable32 (Hash, Hashable (hash), showHash)
 
 data Tree a
