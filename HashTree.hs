@@ -75,8 +75,8 @@ showMerklePath :: MerklePath -> String
 showMerklePath p = showsMerklePath p ""
 
 instance Show a => Show (MerkleProof a) where
-  showsPrec d (MerkleProof element path) =
-    showParen (d > 10) $
+  showsPrec p (MerkleProof element path) =
+    showParen (p > 10) $
       showString "MerkleProof "
         . showsPrec 11 element
         . showString " "
