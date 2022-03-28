@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+-- mn418323
 
 module HashTree where
 import Hashable32 (Hash, Hashable (hash), showHash)
